@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../MoneyTreeFront/MoneyTreeFront.csproj" />
+  <Project Path="MoneyTreeAPI.csproj" />
+</Solution>

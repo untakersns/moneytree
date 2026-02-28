@@ -1,0 +1,6 @@
+@MoneyTreeAPI_HostAddress = http://localhost:5156
+
+GET {{MoneyTreeAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
