@@ -15,15 +15,18 @@ public class AuthController : ControllerBase
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly IJwtService _jwtService;
+    private readonly ICurrentUserService _currentUserService;
 
     public AuthController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
-        IJwtService jwtService)
+        IJwtService jwtService,
+        ICurrentUserService currentUserService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _jwtService = jwtService;
+        _currentUserService = currentUserService;
     }
 
     /// <summary>
@@ -147,7 +150,7 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
     {
-        var userId = _userManager.GetUserId(User);
+        var userId = _currentUserService.UserId;
         var user = await _userManager.FindByIdAsync(userId!);
 
         if (user == null)

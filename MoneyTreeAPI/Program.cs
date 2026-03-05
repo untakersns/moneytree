@@ -13,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddDbContext<MoneyTreeDBContext>(options =>
     options.UseNpgsql(
@@ -33,6 +34,8 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 
 // JWT
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
