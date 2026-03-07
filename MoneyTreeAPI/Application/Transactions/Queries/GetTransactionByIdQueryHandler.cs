@@ -4,11 +4,13 @@ using MoneyTreeAPI.DBs;
 using MoneyTreeAPI.DTOs;
 
 namespace MoneyTreeAPI.Application.Transactions.Queries;
+
 public record GetTransactionByIdQuery : IRequest<TransactionResponseDto?>
 {
     public int Id { get; init; }
     public string UserId { get; init; } = string.Empty;
 }
+
 public class GetTransactionByIdQueryHandler : IRequestHandler<GetTransactionByIdQuery, TransactionResponseDto?>
 {
     private readonly MoneyTreeDBContext _db;

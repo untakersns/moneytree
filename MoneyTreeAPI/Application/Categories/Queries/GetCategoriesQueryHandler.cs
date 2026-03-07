@@ -2,13 +2,14 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MoneyTreeAPI.DBs;
 using MoneyTreeAPI.DTOs;
-using MoneyTreeAPI.Models;
 
 namespace MoneyTreeAPI.Application.Categories.Queries;
+
 public record GetCategoriesQuery : IRequest<List<CategoryResponseDto>>
 {
     public string UserId { get; init; } = string.Empty;
 }
+
 public class GetCategoriesQueryHandler : IRequestHandler<GetCategoriesQuery, List<CategoryResponseDto>>
 {
     private readonly MoneyTreeDBContext _db;

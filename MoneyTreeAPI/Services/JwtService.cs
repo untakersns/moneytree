@@ -1,16 +1,18 @@
+using Microsoft.IdentityModel.Tokens;
+using MoneyTreeAPI.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using MoneyTreeAPI.Models;
 
 namespace MoneyTreeAPI.Services;
 
 public interface IJwtService
 {
     string GenerateToken(User user);
+
     string GenerateRefreshToken();
+
     ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
 }
 
@@ -72,17 +74,17 @@ public class JwtService : IJwtService
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        
+
         try
         {
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-            
+
             if (securityToken is not JwtSecurityToken jwtSecurityToken ||
                 !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
                 return null;
             }
-            
+
             return principal;
         }
         catch

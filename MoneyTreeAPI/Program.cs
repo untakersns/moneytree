@@ -1,4 +1,3 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using MoneyTreeAPI.DBs;
 using MoneyTreeAPI.Models;
 using MoneyTreeAPI.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 

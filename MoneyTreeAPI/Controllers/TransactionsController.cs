@@ -49,9 +49,7 @@ public class TransactionsController : ControllerBase
         return CreatedAtAction(nameof(GetTransactionById), new { id = result.Id }, result);
     }
 
-    /// <summary>
     /// Обновить транзакцию
-    /// </summary>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTransaction(int id, [FromBody] UpdateTransactionDto dto)
     {
@@ -59,7 +57,7 @@ public class TransactionsController : ControllerBase
 
         var command = new UpdateTransactionCommand
         {
-            Id = id,  // ← Берём из URL
+            Id = id,
             Amount = dto.Amount,
             Date = dto.Date,
             Type = dto.Type,
@@ -73,9 +71,7 @@ public class TransactionsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
     /// Удалить транзакцию
-    /// </summary>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTransaction(int id)
     {

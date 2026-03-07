@@ -5,12 +5,14 @@ using MoneyTreeAPI.DTOs;
 using MoneyTreeAPI.Models;
 
 namespace MoneyTreeAPI.Application.Transactions.Queries;
+
 public record GetBalanceQuery : IRequest<BalanceResponseDto>
 {
     public string UserId { get; init; } = string.Empty;
     public DateTime? StartDate { get; init; }
     public DateTime? EndDate { get; init; }
 }
+
 public class GetBalanceQueryHandler : IRequestHandler<GetBalanceQuery, BalanceResponseDto>
 {
     private readonly MoneyTreeDBContext _db;

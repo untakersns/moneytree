@@ -2,15 +2,16 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MoneyTreeAPI.DBs;
 using MoneyTreeAPI.DTOs;
-using MoneyTreeAPI.Models;
 
 namespace MoneyTreeAPI.Application.Transactions.Queries;
+
 public record GetTransactionsQuery : IRequest<List<TransactionResponseDto>>
 {
     public string UserId { get; init; } = string.Empty;
     public DateTime? StartDate { get; init; }
     public DateTime? EndDate { get; init; }
 }
+
 public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, List<TransactionResponseDto>>
 {
     private readonly MoneyTreeDBContext _db;

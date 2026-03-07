@@ -1,10 +1,10 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MoneyTreeAPI.DTOs;
 using MoneyTreeAPI.Models;
 using MoneyTreeAPI.Services;
+using System.Security.Claims;
 
 namespace MoneyTreeAPI.Controllers;
 

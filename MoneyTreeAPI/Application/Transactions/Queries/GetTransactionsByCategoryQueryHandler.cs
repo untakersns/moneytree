@@ -5,12 +5,14 @@ using MoneyTreeAPI.DTOs;
 using MoneyTreeAPI.Models;
 
 namespace MoneyTreeAPI.Application.Transactions.Queries;
+
 public record GetTransactionsByCategoryQuery : IRequest<List<TransactionByCategoryDto>>
 {
     public string UserId { get; init; } = string.Empty;
     public DateTime? StartDate { get; init; }
     public DateTime? EndDate { get; init; }
 }
+
 public class GetTransactionsByCategoryQueryHandler : IRequestHandler<GetTransactionsByCategoryQuery, List<TransactionByCategoryDto>>
 {
     private readonly MoneyTreeDBContext _db;
