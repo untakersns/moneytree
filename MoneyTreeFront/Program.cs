@@ -1,10 +1,34 @@
 using MoneyTreeFront.Components;
+using MoneyTreeFront.Services;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Регистрация сервисов
+builder.Services.AddScoped<LocalStorageService>();
+builder.Services.AddScoped<AuthorizationMessageHandler>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddScoped<CustomAuthStateProvider>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<CategoryService>();
+
+// HttpClient с авторизацией
+builder.Services.AddHttpClient("MoneyTreeAPI", (sp, client) =>
+{
+    client.BaseAddress = new Uri("https://localhost:7027");
+})
+.AddHttpMessageHandler<AuthorizationMessageHandler>();
+
+builder.Services.AddScoped(sp =>
+{
+    var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+    return httpClientFactory.CreateClient("MoneyTreeAPI");
+});
 
 var app = builder.Build();
 
