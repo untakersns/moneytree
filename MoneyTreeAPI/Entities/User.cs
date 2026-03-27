@@ -6,7 +6,8 @@ public enum Currency
 {
     RUB,
     USD,
-    EUR
+    EUR,
+    BYN
 }
 
 public class User : IdentityUser

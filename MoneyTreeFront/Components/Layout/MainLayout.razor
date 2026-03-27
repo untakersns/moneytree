@@ -5,12 +5,12 @@
     <Authorized>
         <div class="app-container">
             <nav class="sidebar">
-                <div class="sidebar-header">
+                <a href="/dashboard" class="sidebar-header">
                     <h3>💰 MoneyTree</h3>
-                </div>
+                </a>
 
                 <div class="nav-menu">
-                    <a class="nav-item" href="/" match="NavLinkMatch.All">
+                    <a class="nav-item" href="/dashboard" match="NavLinkMatch.All">
                         <span class="nav-icon">📊</span>
                         <span>Dashboard</span>
                     </a>
@@ -26,7 +26,7 @@
 
                 <div class="sidebar-footer">
                     <div class="user-info">
-                        <span class="user-email">@context.User.Identity?.Name</span>
+                        <span class="user-email">@context.User.FindFirst(ClaimTypes.Email)?.Value</span>
                     </div>
                     <button class="logout-btn" @onclick="Logout">
                         <span class="nav-icon">🚪</span>
@@ -45,7 +45,9 @@
     <NotAuthorized>
         <div class="auth-layout">
             <header class="auth-header">
-                <div class="logo">💰 MoneyTree</div>
+                <a href="/" class="logo-link">
+                    <div class="logo">💰 MoneyTree</div>
+                </a>
                 <div class="auth-links">
                     <a href="/login" class="auth-link">Вход</a>
                     <a href="/register" class="auth-link register">Регистрация</a>

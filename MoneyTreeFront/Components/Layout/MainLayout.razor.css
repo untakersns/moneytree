@@ -17,6 +17,14 @@
 .sidebar-header {
     padding: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+    color: #fff;
+    display: block;
+    transition: opacity 0.2s;
+}
+
+.sidebar-header:hover {
+    opacity: 0.8;
 }
 
 .sidebar-header h3 {
@@ -163,6 +171,16 @@
     padding: 1rem 2rem;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
+}
+
+.logo-link {
+    text-decoration: none;
+    color: #fff;
+    transition: opacity 0.2s;
+}
+
+.logo-link:hover {
+    opacity: 0.8;
 }
 
 .logo {

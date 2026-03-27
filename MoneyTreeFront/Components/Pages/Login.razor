@@ -65,8 +65,7 @@
         try
         {
             await AuthService.LoginAsync(loginModel.Email, loginModel.Password);
-            // Перезагружаем страницу для обновления состояния
-            Navigation.NavigateTo("/", forceLoad: true);
+            Navigation.NavigateTo("/dashboard", forceLoad: true);
         }
         catch (Exception ex)
         {

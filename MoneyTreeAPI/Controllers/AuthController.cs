@@ -36,11 +36,17 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
+        // Парсим валюту
+        if (!Enum.TryParse<Models.Currency>(dto.Currency, out var currency))
+        {
+            currency = Models.Currency.RUB;
+        }
+
         var user = new User
         {
             UserName = dto.Email,
             Email = dto.Email,
-            Currency = Models.Currency.RUB
+            Currency = currency
         };
 
         var result = await _userManager.CreateAsync(user, dto.Password);

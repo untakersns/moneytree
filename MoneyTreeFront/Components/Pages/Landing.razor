@@ -1,0 +1,112 @@
+@page "/"
+@layout MainLayout
+@using Microsoft.AspNetCore.Components.Authorization
+
+<PageTitle>MoneyTree - Учёт финансов</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="landing-page authorized">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1>💰 MoneyTree</h1>
+                    <p class="tagline">Добро пожаловать обратно!</p>
+                    
+                    <div class="dashboard-preview">
+                        <p class="preview-text">Уже готовы управлять своими финансами?</p>
+                        <a href="/dashboard" class="btn btn-primary btn-large">📊 Перейти на Dashboard</a>
+                    </div>
+                </div>
+                
+                <div class="hero-image">
+                    <div class="mockup">
+                        <div class="mockup-header">
+                            <div class="mockup-dot"></div>
+                            <div class="mockup-dot"></div>
+                            <div class="mockup-dot"></div>
+                        </div>
+                        <div class="mockup-content">
+                            <div class="mockup-balance">
+                                <span>Баланс</span>
+                                <strong>150 000 ₽</strong>
+                            </div>
+                            <div class="mockup-chart">
+                                <div class="bar" style="height: 60%"></div>
+                                <div class="bar" style="height: 80%"></div>
+                                <div class="bar" style="height: 45%"></div>
+                                <div class="bar" style="height: 90%"></div>
+                                <div class="bar" style="height: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <footer class="landing-footer">
+                <p>&copy; 2026 MoneyTree. Все права защищены.</p>
+            </footer>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="landing-page">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1>💰 MoneyTree</h1>
+                    <p class="tagline">Ваш персональный финансовый помощник</p>
+                    
+                    <div class="features">
+                        <div class="feature">
+                            <div class="feature-icon">📊</div>
+                            <h3>Аналитика</h3>
+                            <p>Контролируйте доходы и расходы с наглядными графиками</p>
+                        </div>
+                        
+                        <div class="feature">
+                            <div class="feature-icon">🏷️</div>
+                            <h3>Категории</h3>
+                            <p>Создавайте свои категории или используйте готовые</p>
+                        </div>
+                        
+                        <div class="feature">
+                            <div class="feature-icon">📱</div>
+                            <h3>Удобство</h3>
+                            <p>Простой и интуитивный интерфейс для ежедневного использования</p>
+                        </div>
+                    </div>
+                    
+                    <div class="cta-buttons">
+                        <a href="/login" class="btn btn-primary">Войти</a>
+                        <a href="/register" class="btn btn-secondary">Зарегистрироваться</a>
+                    </div>
+                </div>
+                
+                <div class="hero-image">
+                    <div class="mockup">
+                        <div class="mockup-header">
+                            <div class="mockup-dot"></div>
+                            <div class="mockup-dot"></div>
+                            <div class="mockup-dot"></div>
+                        </div>
+                        <div class="mockup-content">
+                            <div class="mockup-balance">
+                                <span>Баланс</span>
+                                <strong>150 000 ₽</strong>
+                            </div>
+                            <div class="mockup-chart">
+                                <div class="bar" style="height: 60%"></div>
+                                <div class="bar" style="height: 80%"></div>
+                                <div class="bar" style="height: 45%"></div>
+                                <div class="bar" style="height: 90%"></div>
+                                <div class="bar" style="height: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <footer class="landing-footer">
+                <p>&copy; 2026 MoneyTree. Все права защищены.</p>
+            </footer>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>

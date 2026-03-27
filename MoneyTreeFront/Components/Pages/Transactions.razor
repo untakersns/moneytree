@@ -1,7 +1,241 @@
 @page "/transactions"
 @layout MainLayout
+@inject TransactionService TransactionService
+@inject CategoryService CategoryService
 
 <PageTitle>Транзакции - MoneyTree</PageTitle>
 
-<h1>Транзакции</h1>
-<p>Список транзакций будет здесь</p>
+<div class="transactions-page">
+    <div class="page-header">
+        <h1>Транзакции</h1>
+        <button class="btn btn-primary" @onclick="ToggleForm">
+            @(ShowForm ? "Скрыть форму" : "+ Добавить транзакцию")
+        </button>
+    </div>
+
+    @if (ShowForm)
+    {
+        <div class="form-card">
+            <h2>Новая транзакция</h2>
+            
+            <EditForm Model="transactionForm" OnValidSubmit="CreateTransaction">
+                <DataAnnotationsValidator />
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="type">Тип</label>
+                        <InputSelect id="type" class="form-control" @bind-Value="transactionForm.Type">
+                            <option value="Expense">Расход</option>
+                            <option value="Income">Доход</option>
+                        </InputSelect>
+                        <ValidationMessage For="@(() => transactionForm.Type)" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amount">Сумма</label>
+                        <InputNumber id="amount" class="form-control" @bind-Value="transactionForm.Amount" step="0.01" />
+                        <ValidationMessage For="@(() => transactionForm.Amount)" />
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="categoryId">Категория</label>
+                        <InputSelect id="categoryId" class="form-control" @bind-Value="transactionForm.CategoryId">
+                            @foreach (var cat in filteredCategories)
+                            {
+                                <option value="@cat.Id">@cat.Name</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => transactionForm.CategoryId)" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date">Дата</label>
+                        <InputDate id="date" class="form-control" @bind-Value="transactionForm.Date" />
+                        <ValidationMessage For="@(() => transactionForm.Date)" />
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comment">Комментарий</label>
+                    <InputText id="comment" class="form-control" @bind-Value="transactionForm.Comment" />
+                    <ValidationMessage For="@(() => transactionForm.Comment)" />
+                </div>
+                
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="error-message">@errorMessage</div>
+                }
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" @onclick="ToggleForm">Отмена</button>
+                    <button type="submit" class="btn btn-primary" disabled="@(isSubmitting)">
+                        @(isSubmitting ? "Сохранение..." : "Сохранить")
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    }
+
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <p>Загрузка...</p>
+        </div>
+    }
+    else if (transactions.Any())
+    {
+        <div class="transactions-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Категория</th>
+                        <th>Тип</th>
+                        <th>Сумма</th>
+                        <th>Комментарий</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in transactions.OrderByDescending(x => x.Date))
+                    {
+                        <tr class="transaction-row @(t.Type.ToLower())">
+                            <td>@t.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <span class="category-badge">@t.CategoryName</span>
+                            </td>
+                            <td>
+                                <span class="type-badge @(t.Type.ToLower())">
+                                    @(t.Type.ToLower() == "income" ? "Доход" : "Расход")
+                                </span>
+                            </td>
+                            <td class="amount @(t.Type.ToLower() == "income" ? "positive" : "negative")">
+                                @(t.Type.ToLower() == "income" ? "+" : "-") @t.Amount.ToString("N2") RUB
+                            </td>
+                            <td class="comment">@t.Comment</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">💸</div>
+            <h3>Транзакций пока нет</h3>
+            <p>Добавьте первую транзакцию</p>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool ShowForm = false;
+    private bool isSubmitting = false;
+    private string errorMessage = "";
+    private List<TransactionDto> transactions = new();
+    private List<CategoryDto> allCategories = new();
+    private List<CategoryDto> filteredCategories = new();
+    
+    private TransactionFormModel transactionForm = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private void ToggleForm()
+    {
+        ShowForm = !ShowForm;
+        if (ShowForm)
+        {
+            transactionForm = new();
+            FilterCategories();
+        }
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        
+        try
+        {
+            transactions = await TransactionService.GetAllAsync();
+            allCategories = await CategoryService.GetAllAsync();
+            FilterCategories();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void FilterCategories()
+    {
+        filteredCategories = allCategories
+            .Where(c => c.Type.ToLower() == transactionForm.Type.ToLower())
+            .ToList();
+        
+        if (!filteredCategories.Any())
+        {
+            filteredCategories = allCategories;
+        }
+    }
+
+    private async Task CreateTransaction()
+    {
+        isSubmitting = true;
+        errorMessage = "";
+        
+        try
+        {
+            var createDto = new CreateTransactionDto
+            {
+                Amount = transactionForm.Amount,
+                Date = transactionForm.Date,
+                Type = transactionForm.Type,
+                CategoryId = transactionForm.CategoryId,
+                Comment = transactionForm.Comment
+            };
+            
+            await TransactionService.CreateAsync(createDto);
+            
+            ShowForm = false;
+            transactionForm = new();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private class TransactionFormModel
+    {
+        [Required(ErrorMessage = "Выберите тип")]
+        public string Type { get; set; } = "Expense";
+        
+        [Required(ErrorMessage = "Введите сумму")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Сумма должна быть больше 0")]
+        public decimal Amount { get; set; }
+        
+        [Required(ErrorMessage = "Выберите категорию")]
+        public int CategoryId { get; set; }
+        
+        [Required(ErrorMessage = "Выберите дату")]
+        public DateTime Date { get; set; } = DateTime.UtcNow;
+        
+        public string? Comment { get; set; }
+    }
+}

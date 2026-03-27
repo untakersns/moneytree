@@ -40,10 +40,13 @@
 
             <div class="form-group">
                 <label for="currency">Валюта</label>
-                <InputSelect id="currency" class="form-control" @bind-Value="registerModel.Currency">
-                    <option value="RUB">RUB</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
+                <InputSelect id="currency"
+                             class="form-control"
+                             @bind-Value="registerModel.Currency">
+                    <option value="RUB">RUB - Российский рубль</option>
+                    <option value="USD">USD - Доллар США</option>
+                    <option value="EUR">EUR - Евро</option>
+                    <option value="BYN">BYN - Белорусский рубль</option>
                 </InputSelect>
                 <ValidationMessage For="@(() => registerModel.Currency)" />
             </div>
@@ -74,7 +77,7 @@
 @code {
     private RegisterModel registerModel = new();
     private string errorMessage = "";
-    private bool isSubmitting;
+    private bool isSubmitting = false;
 
     private async Task HandleRegister()
     {
@@ -84,8 +87,7 @@
         try
         {
             await AuthService.RegisterAsync(registerModel.Email, registerModel.Password, registerModel.Currency);
-            // Перезагружаем страницу для обновления состояния
-            Navigation.NavigateTo("/", forceLoad: true);
+            Navigation.NavigateTo("/dashboard", forceLoad: true);
         }
         catch (Exception ex)
         {
@@ -107,10 +109,11 @@
         [MinLength(6, ErrorMessage = "Пароль должен быть не менее 6 символов")]
         public string Password { get; set; } = "";
 
-        [Required(ErrorMessage = "Подтверждение пароля обязательно")]
+        [Required(ErrorMessage = "Подтвердите пароль")]
         [Compare("Password", ErrorMessage = "Пароли не совпадают")]
         public string ConfirmPassword { get; set; } = "";
 
+        [Required(ErrorMessage = "Выберите валюту")]
         public string Currency { get; set; } = "RUB";
     }
 }

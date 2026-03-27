@@ -1,0 +1,165 @@
+@page "/dashboard"
+@layout MainLayout
+@inject TransactionService TransactionService
+@inject CategoryService CategoryService
+
+<PageTitle>Dashboard - MoneyTree</PageTitle>
+
+@if (isLoading)
+{
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Загрузка...</p>
+    </div>
+}
+else
+{
+    <div class="dashboard">
+        @* Баланс *@
+        <div class="balance-cards">
+            <div class="card balance-card income">
+                <div class="card-icon">📈</div>
+                <div class="card-content">
+                    <h3>Доходы</h3>
+                    <p class="amount positive">@balance.TotalIncome.ToString("N2") @balance.Currency</p>
+                </div>
+            </div>
+
+            <div class="card balance-card expense">
+                <div class="card-icon">📉</div>
+                <div class="card-content">
+                    <h3>Расходы</h3>
+                    <p class="amount negative">@balance.TotalExpense.ToString("N2") @balance.Currency</p>
+                </div>
+            </div>
+
+            <div class="card balance-card total">
+                <div class="card-icon">💰</div>
+                <div class="card-content">
+                    <h3>Баланс</h3>
+                    <p class="amount @(balance.Balance >= 0 ? "positive" : "negative")">
+                        @balance.Balance.ToString("N2") @balance.Currency
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @* Расходы по категориям *@
+        @if (expensesByCategory.Any())
+        {
+            <div class="chart-section">
+                <h2>Расходы по категориям</h2>
+                <div class="categories-chart">
+                    @foreach (var item in expensesByCategory)
+                    {
+                        var percentage = balance.TotalExpense > 0 
+                            ? (item.TotalAmount / balance.TotalExpense * 100) 
+                            : 0;
+                        
+                        <div class="category-bar">
+                            <div class="category-info">
+                                <span class="category-name">@item.CategoryName</span>
+                                <span class="category-amount">@item.TotalAmount.ToString("N2") @balance.Currency</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: @percentage%"></div>
+                            </div>
+                            <span class="category-percent">@percentage.ToString("N0")%</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @* Последние транзакции *@
+        <div class="transactions-section">
+            <div class="section-header">
+                <h2>Последние транзакции</h2>
+                <a href="/transactions" class="view-all" @onclick="NavigateToTransactions">Все транзакции →</a>
+            </div>
+            
+            @if (recentTransactions.Any())
+            {
+                <div class="transactions-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Категория</th>
+                                <th>Дата</th>
+                                <th>Сумма</th>
+                                <th>Комментарий</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in recentTransactions)
+                            {
+                                <tr class="transaction-row @(t.Type.ToLower())">
+                                    <td>
+                                        <span class="category-badge">@t.CategoryName</span>
+                                    </td>
+                                    <td>@t.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td class="amount @(t.Type.ToLower() == "income" ? "positive" : "negative")">
+                                        @(t.Type.ToLower() == "income" ? "+" : "-") @t.Amount.ToString("N2") @balance.Currency
+                                    </td>
+                                    <td class="comment">@t.Comment</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <p>Транзакций пока нет</p>
+                    <a href="/transactions" class="btn btn-primary">Добавить первую</a>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private bool isLoading = true;
+    private BalanceDto balance = new();
+    private List<ExpenseByCategoryDto> expensesByCategory = new();
+    private List<TransactionDto> recentTransactions = new();
+
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private void NavigateToTransactions()
+    {
+        Navigation.NavigateTo("/transactions", forceLoad: true);
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        
+        try
+        {
+            // Загружаем баланс
+            balance = await TransactionService.GetBalanceAsync();
+            
+            // Загружаем расходы по категориям
+            expensesByCategory = await TransactionService.GetExpensesByCategoryAsync();
+            
+            // Загружаем последние транзакции (только 5)
+            var allTransactions = await TransactionService.GetAllAsync();
+            recentTransactions = allTransactions.OrderByDescending(t => t.Date).Take(5).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка загрузки: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
