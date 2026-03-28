@@ -11,18 +11,25 @@ builder.Services.AddRazorComponents()
 // Регистрация сервисов
 builder.Services.AddScoped<LocalStorageService>();
 builder.Services.AddScoped<AuthorizationMessageHandler>();
+builder.Services.AddScoped<TokenRefreshService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<CategoryService>();
 
-// HttpClient с авторизацией
+// HttpClient для авторизованных запросов (с токеном)
 builder.Services.AddHttpClient("MoneyTreeAPI", (sp, client) =>
 {
     client.BaseAddress = new Uri("https://localhost:7027");
 })
 .AddHttpMessageHandler<AuthorizationMessageHandler>();
+
+// HttpClient для анонимных запросов (refresh token)
+builder.Services.AddHttpClient("MoneyTreeAPI.Anonymous", (sp, client) =>
+{
+    client.BaseAddress = new Uri("https://localhost:7027");
+});
 
 builder.Services.AddScoped(sp =>
 {

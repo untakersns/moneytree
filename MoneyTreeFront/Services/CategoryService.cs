@@ -4,24 +4,26 @@ namespace MoneyTreeFront.Services;
 
 public class CategoryService
 {
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public CategoryService(HttpClient httpClient)
+    public CategoryService(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<List<CategoryDto>> GetAllAsync()
     {
-        var categories = await _httpClient.GetFromJsonAsync<List<CategoryDto>>("/api/transactions/categories");
+        var httpClient = _httpClientFactory.CreateClient("MoneyTreeAPI");
+        var categories = await httpClient.GetFromJsonAsync<List<CategoryDto>>("/api/transactions/categories");
         return categories ?? new List<CategoryDto>();
     }
 
     public async Task<CategoryDto> CreateAsync(CreateCategoryDto dto)
     {
-        var response = await _httpClient.PostAsJsonAsync("/api/transactions/categories", dto);
+        var httpClient = _httpClientFactory.CreateClient("MoneyTreeAPI");
+        var response = await httpClient.PostAsJsonAsync("/api/transactions/categories", dto);
         response.EnsureSuccessStatusCode();
-        
+
         var created = await response.Content.ReadFromJsonAsync<CategoryDto>();
         return created!;
     }

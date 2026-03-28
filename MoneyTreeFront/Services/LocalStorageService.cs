@@ -16,9 +16,16 @@ public class LocalStorageService
     {
         // Сохраняем в кэш (доступен всегда)
         _cache[key] = value;
-        
+
         // Сохраняем в localStorage браузера
-        await _js.InvokeVoidAsync("localStorage.setItem", key, value);
+        try
+        {
+            await _js.InvokeVoidAsync("localStorage.setItem", key, value);
+        }
+        catch (InvalidOperationException)
+        {
+            // JSInterop недоступен во время prerendering
+        }
     }
 
     public async ValueTask<string?> GetItemAsync(string key)
@@ -28,7 +35,7 @@ public class LocalStorageService
         {
             return cached;
         }
-        
+
         // Если нет — читаем из localStorage
         try
         {
@@ -48,12 +55,26 @@ public class LocalStorageService
     public async ValueTask RemoveItemAsync(string key)
     {
         _cache.Remove(key);
-        await _js.InvokeVoidAsync("localStorage.removeItem", key);
+        try
+        {
+            await _js.InvokeVoidAsync("localStorage.removeItem", key);
+        }
+        catch (InvalidOperationException)
+        {
+            // Игнорируем ошибки во время prerendering
+        }
     }
 
     public async ValueTask ClearAsync()
     {
         _cache.Clear();
-        await _js.InvokeVoidAsync("localStorage.clear");
+        try
+        {
+            await _js.InvokeVoidAsync("localStorage.clear");
+        }
+        catch (InvalidOperationException)
+        {
+            // Игнорируем ошибки во время prerendering
+        }
     }
 }
