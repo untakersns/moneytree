@@ -119,7 +119,7 @@ public class AuthController : ControllerBase
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto dto)
     {
-        var userData = _jwtService.GetPrincipalFromExpiredToken(dto.RefreshToken);
+        var userData = _jwtService.GetPrincipalFromExpiredToken(dto.AccessToken);
         if (userData == null)
         {
             return Unauthorized(new { message = "Неверный токен" });

@@ -5,6 +5,15 @@
 
 <PageTitle>Транзакции - MoneyTree</PageTitle>
 
+@if (!isAuthenticated)
+{
+    <div class="loading-container">
+        <p>Для просмотра этой страницы необходимо войти в систему</p>
+        <a href="/login" class="btn btn-primary">Войти</a>
+    </div>
+}
+else
+{
 <div class="transactions-page">
     <div class="page-header">
         <h1>Транзакции</h1>
@@ -24,7 +33,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="type">Тип</label>
-                        <InputSelect id="type" class="form-control" @bind-Value="transactionForm.Type">
+                        <InputSelect id="type" class="form-control" @bind-Value="SelectedType">
                             <option value="Expense">Расход</option>
                             <option value="Income">Доход</option>
                         </InputSelect>
@@ -130,9 +139,11 @@
         </div>
     }
 </div>
+}
 
 @code {
     private bool isLoading = true;
+    private bool isAuthenticated = false;
     private bool ShowForm = false;
     private bool isSubmitting = false;
     private string errorMessage = "";
@@ -141,9 +152,29 @@
     private List<CategoryDto> filteredCategories = new();
     
     private TransactionFormModel transactionForm = new();
+    
+    private string SelectedType
+    {
+        get => transactionForm.Type;
+        set
+        {
+            transactionForm.Type = value;
+            FilterCategories();
+        }
+    }
+
+    [Inject] private AuthService AuthService { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
+        isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        
+        if (!isAuthenticated)
+        {
+            isLoading = false;
+            return;
+        }
+        
         await LoadData();
     }
 
@@ -152,7 +183,11 @@
         ShowForm = !ShowForm;
         if (ShowForm)
         {
-            transactionForm = new();
+            transactionForm = new TransactionFormModel
+            {
+                Type = "Expense",
+                Date = DateTime.UtcNow
+            };
             FilterCategories();
         }
     }
@@ -179,10 +214,12 @@
 
     private void FilterCategories()
     {
+        var selectedType = transactionForm.Type?.ToLower() ?? "expense";
+
         filteredCategories = allCategories
-            .Where(c => c.Type.ToLower() == transactionForm.Type.ToLower())
+            .Where(c => c.Type.ToLower() == selectedType)
             .ToList();
-        
+
         if (!filteredCategories.Any())
         {
             filteredCategories = allCategories;

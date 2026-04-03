@@ -87,7 +87,7 @@ public class TransactionService
     {
         var httpClient = _httpClientFactory.CreateClient("MoneyTreeAPI");
         
-        var url = "/api/transactions/expenses-by-category";
+        var url = "/api/transactions/transactions-by-category";
         var queryParams = new List<string>();
 
         if (startDate.HasValue)

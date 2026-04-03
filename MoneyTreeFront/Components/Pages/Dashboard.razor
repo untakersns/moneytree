@@ -2,10 +2,18 @@
 @layout MainLayout
 @inject TransactionService TransactionService
 @inject CategoryService CategoryService
+@inject NavigationManager Navigation
 
 <PageTitle>Dashboard - MoneyTree</PageTitle>
 
-@if (isLoading)
+@if (!isAuthenticated)
+{
+    <div class="loading-container">
+        <p>Для просмотра этой страницы необходимо войти в систему</p>
+        <a href="/login" class="btn btn-primary">Войти</a>
+    </div>
+}
+else if (isLoading)
 {
     <div class="loading-container">
         <div class="spinner"></div>
@@ -15,6 +23,18 @@
 else
 {
     <div class="dashboard">
+        <div class="dashboard-header">
+            <h1>Обзор финансов</h1>
+            <div class="period-selector">
+                <select @onchange="OnPeriodChangedAsync" class="period-select" value="@selectedPeriod">
+                    <option value="week">Эта неделя</option>
+                    <option value="month">Этот месяц</option>
+                    <option value="year">Этот год</option>
+                    <option value="all">Всё время</option>
+                </select>
+            </div>
+        </div>
+        
         @* Баланс *@
         <div class="balance-cards">
             <div class="card balance-card income">
@@ -121,14 +141,24 @@ else
 
 @code {
     private bool isLoading = true;
+    private bool isAuthenticated = false;
     private BalanceDto balance = new();
     private List<ExpenseByCategoryDto> expensesByCategory = new();
     private List<TransactionDto> recentTransactions = new();
+    private string selectedPeriod = "month";
 
-    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private AuthService AuthService { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
+        isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        
+        if (!isAuthenticated)
+        {
+            isLoading = false;
+            return;
+        }
+        
         await LoadData();
     }
 
@@ -137,25 +167,65 @@ else
         Navigation.NavigateTo("/transactions", forceLoad: true);
     }
 
+    private async Task OnPeriodChangedAsync(ChangeEventArgs e)
+    {
+        selectedPeriod = e.Value?.ToString() ?? "month";
+        await LoadData();
+        StateHasChanged();
+    }
+
     private async Task LoadData()
     {
         isLoading = true;
-        
+
         try
         {
+            var now = DateTime.UtcNow;
+            DateTime? startDate = null;
+            DateTime? endDate = null;
+
+            switch (selectedPeriod)
+            {
+                case "week":
+                    startDate = now.AddDays(-(int)now.DayOfWeek);
+                    endDate = now.AddDays(1); // +1 день чтобы включить сегодняшние транзакции
+                    break;
+                case "month":
+                    startDate = new DateTime(now.Year, now.Month, 1);
+                    endDate = now.AddDays(1);
+                    break;
+                case "year":
+                    startDate = new DateTime(now.Year, 1, 1);
+                    endDate = now.AddDays(1);
+                    break;
+                case "all":
+                default:
+                    startDate = null;
+                    endDate = null;
+                    break;
+            }
+
+            Console.WriteLine($"📊 Загрузка Dashboard за период: {selectedPeriod}");
+            Console.WriteLine($"   startDate: {startDate}, endDate: {endDate}");
+
             // Загружаем баланс
-            balance = await TransactionService.GetBalanceAsync();
-            
+            balance = await TransactionService.GetBalanceAsync(startDate, endDate);
+            Console.WriteLine($"   💰 Баланс: {balance.Balance}");
+
             // Загружаем расходы по категориям
-            expensesByCategory = await TransactionService.GetExpensesByCategoryAsync();
-            
+            expensesByCategory = await TransactionService.GetExpensesByCategoryAsync(startDate, endDate);
+            Console.WriteLine($"   📊 Категорий: {expensesByCategory.Count}");
+
             // Загружаем последние транзакции (только 5)
-            var allTransactions = await TransactionService.GetAllAsync();
+            var allTransactions = await TransactionService.GetAllAsync(startDate, endDate);
+            Console.WriteLine($"   📄 Всего транзакций: {allTransactions.Count}");
+            
             recentTransactions = allTransactions.OrderByDescending(t => t.Date).Take(5).ToList();
+            Console.WriteLine($"   📄 Показываем: {recentTransactions.Count}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ошибка загрузки: {ex.Message}");
+            Console.WriteLine($"❌ Ошибка загрузки: {ex.Message}");
         }
         finally
         {

@@ -1,7 +1,212 @@
 @page "/categories"
 @layout MainLayout
+@inject CategoryService CategoryService
 
 <PageTitle>Категории - MoneyTree</PageTitle>
 
-<h1>Категории</h1>
-<p>Управление категориями будет здесь</p>
+@if (!isAuthenticated)
+{
+    <div class="loading-container">
+        <p>Для просмотра этой страницы необходимо войти в систему</p>
+        <a href="/login" class="btn btn-primary">Войти</a>
+    </div>
+}
+else
+{
+<div class="categories-page">
+    <div class="page-header">
+        <h1>Категории</h1>
+        <button class="btn btn-primary" @onclick="ToggleForm">
+            @(ShowForm ? "Скрыть форму" : "+ Добавить категорию")
+        </button>
+    </div>
+
+    @if (ShowForm)
+    {
+        <div class="form-card">
+            <h2>Новая категория</h2>
+            
+            <EditForm Model="categoryForm" OnValidSubmit="CreateCategory">
+                <DataAnnotationsValidator />
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Название</label>
+                        <InputText id="name" class="form-control" @bind-Value="categoryForm.Name" />
+                        <ValidationMessage For="@(() => categoryForm.Name)" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="type">Тип</label>
+                        <InputSelect id="type" class="form-control" @bind-Value="categoryForm.Type">
+                            <option value="Expense">Расход</option>
+                            <option value="Income">Доход</option>
+                        </InputSelect>
+                        <ValidationMessage For="@(() => categoryForm.Type)" />
+                    </div>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="error-message">@errorMessage</div>
+                }
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" @onclick="ToggleForm">Отмена</button>
+                    <button type="submit" class="btn btn-primary" disabled="@(isSubmitting)">
+                        @(isSubmitting ? "Сохранение..." : "Сохранить")
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    }
+
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <p>Загрузка...</p>
+        </div>
+    }
+    else if (categories.Any())
+    {
+        <div class="categories-list">
+            @* Категории расходов *@
+            <div class="category-section">
+                <h2>📉 Расходы</h2>
+                <div class="categories-grid">
+                    @foreach (var cat in categories.Where(c => c.Type == "Expense"))
+                    {
+                        <div class="category-card expense">
+                            <span class="category-icon">💸</span>
+                            <span class="category-name">@cat.Name</span>
+                            @if (cat.IsSystem)
+                            {
+                                <span class="system-badge">Системная</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            @* Категории доходов *@
+            <div class="category-section">
+                <h2>📈 Доходы</h2>
+                <div class="categories-grid">
+                    @foreach (var cat in categories.Where(c => c.Type == "Income"))
+                    {
+                        <div class="category-card income">
+                            <span class="category-icon">💰</span>
+                            <span class="category-name">@cat.Name</span>
+                            @if (cat.IsSystem)
+                            {
+                                <span class="system-badge">Системная</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🏷️</div>
+            <h3>Категорий пока нет</h3>
+            <p>Создайте первую категорию</p>
+        </div>
+    }
+</div>
+}
+
+@code {
+    private bool isLoading = true;
+    private bool isAuthenticated = false;
+    private bool ShowForm = false;
+    private bool isSubmitting = false;
+    private string errorMessage = "";
+    private List<CategoryDto> categories = new();
+    
+    private CategoryFormModel categoryForm = new();
+
+    [Inject] private AuthService AuthService { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        
+        if (!isAuthenticated)
+        {
+            isLoading = false;
+            return;
+        }
+        
+        await LoadCategories();
+    }
+
+    private void ToggleForm()
+    {
+        ShowForm = !ShowForm;
+        if (ShowForm)
+        {
+            categoryForm = new();
+        }
+    }
+
+    private async Task LoadCategories()
+    {
+        isLoading = true;
+        
+        try
+        {
+            categories = await CategoryService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка загрузки: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateCategory()
+    {
+        isSubmitting = true;
+        errorMessage = "";
+        
+        try
+        {
+            var createDto = new CreateCategoryDto
+            {
+                Name = categoryForm.Name,
+                Type = categoryForm.Type
+            };
+            
+            await CategoryService.CreateAsync(createDto);
+            
+            ShowForm = false;
+            categoryForm = new();
+            await LoadCategories();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private class CategoryFormModel
+    {
+        [Required(ErrorMessage = "Введите название")]
+        [StringLength(50, MinimumLength = 2, ErrorMessage = "Название от 2 до 50 символов")]
+        public string Name { get; set; } = "";
+        
+        [Required(ErrorMessage = "Выберите тип")]
+        public string Type { get; set; } = "Expense";
+    }
+}

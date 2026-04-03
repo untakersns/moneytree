@@ -108,7 +108,7 @@
 }
 
 .content {
-    padding: 2rem;
+    padding: 0;
 }
 
 @media (max-width: 768px) {
