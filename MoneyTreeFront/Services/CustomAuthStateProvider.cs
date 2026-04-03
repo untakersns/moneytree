@@ -1,5 +1,5 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace MoneyTreeFront.Services;
@@ -29,7 +29,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
             // Парсим JWT токен для получения claims и проверки срока действия
             var claims = ParseClaimsFromJwt(token);
-            
+
             // Проверяем, не истёк ли токен
             var expClaim = claims.FirstOrDefault(c => c.Type == "exp");
             if (expClaim != null)
@@ -59,7 +59,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     {
         var claims = new List<Claim>();
         var payload = jwt.Split('.')[1];
-        
+
         // Добавляем паддинги для корректного декодирования
         var padLength = 4 - (payload.Length % 4);
         if (padLength < 4)

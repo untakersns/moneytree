@@ -16,7 +16,7 @@ public class MoneyTreeDBContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.Id);

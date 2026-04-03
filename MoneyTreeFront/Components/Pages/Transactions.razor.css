@@ -12,11 +12,11 @@
     margin-bottom: 2rem;
 }
 
-.page-header h1 {
-    margin: 0;
-    font-size: 2rem;
-    color: #1a1a2e;
-}
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        color: #1a1a2e;
+    }
 
 .btn {
     display: inline-flex;
@@ -36,25 +36,25 @@
     color: #fff;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
 
-.btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
 
 .btn-secondary {
     background: #f0f0f0;
     color: #333;
 }
 
-.btn-secondary:hover {
-    background: #e0e0e0;
-}
+    .btn-secondary:hover {
+        background: #e0e0e0;
+    }
 
 /* Form Card */
 .form-card {
@@ -65,11 +65,11 @@
     margin-bottom: 2rem;
 }
 
-.form-card h2 {
-    margin: 0 0 1.5rem;
-    font-size: 1.5rem;
-    color: #1a1a2e;
-}
+    .form-card h2 {
+        margin: 0 0 1.5rem;
+        font-size: 1.5rem;
+        color: #1a1a2e;
+    }
 
 .form-row {
     display: grid;
@@ -84,11 +84,11 @@
     gap: 0.5rem;
 }
 
-.form-group label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #333;
-}
+    .form-group label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #333;
+    }
 
 .form-control {
     padding: 0.75rem 1rem;
@@ -99,10 +99,10 @@
     background: #fff;
 }
 
-.form-control:focus {
-    outline: none;
-    border-color: #667eea;
-}
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+    }
 
 select.form-control {
     cursor: pointer;
@@ -138,26 +138,26 @@ select.form-control {
     overflow: hidden;
 }
 
-.transactions-table table {
-    width: 100%;
-    border-collapse: collapse;
-}
+    .transactions-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-.transactions-table th {
-    text-align: left;
-    padding: 1rem 1.5rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #666;
-    background: #f9f9fb;
-    border-bottom: 2px solid #e0e0e0;
-}
+    .transactions-table th {
+        text-align: left;
+        padding: 1rem 1.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #666;
+        background: #f9f9fb;
+        border-bottom: 2px solid #e0e0e0;
+    }
 
-.transactions-table td {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #f5f7fa;
-}
+    .transactions-table td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #f5f7fa;
+    }
 
 .transaction-row:last-child td {
     border-bottom: none;
@@ -204,28 +204,28 @@ select.form-control {
     text-transform: uppercase;
 }
 
-.type-badge.income {
-    background: rgba(76, 175, 80, 0.1);
-    color: #4caf50;
-}
+    .type-badge.income {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
 
-.type-badge.expense {
-    background: rgba(244, 67, 54, 0.1);
-    color: #f44336;
-}
+    .type-badge.expense {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
 
 .amount {
     font-weight: 600;
     font-size: 1rem;
 }
 
-.amount.positive {
-    color: #4caf50;
-}
+    .amount.positive {
+        color: #4caf50;
+    }
 
-.amount.negative {
-    color: #f44336;
-}
+    .amount.negative {
+        color: #f44336;
+    }
 
 .comment {
     color: #666;
@@ -280,7 +280,9 @@ select.form-control {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .loading-container p {
@@ -293,8 +295,8 @@ select.form-control {
     .transactions-table {
         overflow-x: auto;
     }
-    
-    .transactions-table table {
-        min-width: 800px;
-    }
+
+        .transactions-table table {
+            min-width: 800px;
+        }
 }

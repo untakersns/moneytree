@@ -17,23 +17,23 @@
     max-width: 400px;
 }
 
-.login-card h1 {
-    margin: 0 0 1.5rem;
-    color: #1a1a2e;
-    font-size: 1.75rem;
-    text-align: center;
-}
+    .login-card h1 {
+        margin: 0 0 1.5rem;
+        color: #1a1a2e;
+        font-size: 1.75rem;
+        text-align: center;
+    }
 
 .form-group {
     margin-bottom: 1.25rem;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #333;
-    font-weight: 500;
-}
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 500;
+    }
 
 .form-control {
     width: 100%;
@@ -45,10 +45,10 @@
     box-sizing: border-box;
 }
 
-.form-control:focus {
-    outline: none;
-    border-color: #667eea;
-}
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+    }
 
 .btn {
     width: 100%;
@@ -66,16 +66,16 @@
     color: #fff;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
 
-.btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
 
 .error-message {
     background: #fee;
@@ -93,21 +93,21 @@
     text-align: center;
 }
 
-.login-footer p {
-    margin: 0;
-    color: #666;
-    font-size: 0.875rem;
-}
+    .login-footer p {
+        margin: 0;
+        color: #666;
+        font-size: 0.875rem;
+    }
 
-.login-footer a {
-    color: #667eea;
-    text-decoration: none;
-    font-weight: 500;
-}
+    .login-footer a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
 
-.login-footer a:hover {
-    text-decoration: underline;
-}
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
 
 /* Validation styles */
 .validation-message {

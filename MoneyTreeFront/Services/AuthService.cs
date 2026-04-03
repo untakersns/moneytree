@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Components;
 using MoneyTreeFront.DTOs;
 
 namespace MoneyTreeFront.Services;
@@ -103,7 +102,7 @@ public class AuthService
             }
 
             var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
-            
+
             if (authResponse != null)
             {
                 await _localStorage.SetItemAsync("accessToken", authResponse.AccessToken);

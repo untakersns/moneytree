@@ -14,7 +14,7 @@ public class TransactionService
     public async Task<List<TransactionDto>> GetAllAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
         var httpClient = _httpClientFactory.CreateClient("MoneyTreeAPI");
-        
+
         var url = "/api/transactions";
         var queryParams = new List<string>();
 
@@ -64,7 +64,7 @@ public class TransactionService
     public async Task<BalanceDto> GetBalanceAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
         var httpClient = _httpClientFactory.CreateClient("MoneyTreeAPI");
-        
+
         var url = "/api/transactions/balance";
         var queryParams = new List<string>();
 
@@ -86,7 +86,7 @@ public class TransactionService
         DateTime? endDate = null)
     {
         var httpClient = _httpClientFactory.CreateClient("MoneyTreeAPI");
-        
+
         var url = "/api/transactions/transactions-by-category";
         var queryParams = new List<string>();
 

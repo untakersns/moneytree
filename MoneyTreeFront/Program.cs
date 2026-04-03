@@ -1,6 +1,6 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using MoneyTreeFront.Components;
 using MoneyTreeFront.Services;
-using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 

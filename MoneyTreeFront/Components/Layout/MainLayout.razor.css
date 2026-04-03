@@ -23,15 +23,15 @@
     transition: opacity 0.2s;
 }
 
-.sidebar-header:hover {
-    opacity: 0.8;
-}
+    .sidebar-header:hover {
+        opacity: 0.8;
+    }
 
-.sidebar-header h3 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-}
+    .sidebar-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
 
 .nav-menu {
     flex: 1;
@@ -47,16 +47,16 @@
     transition: all 0.2s;
 }
 
-.nav-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
+    .nav-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
 
-.nav-item.active {
-    background: rgba(76, 175, 80, 0.2);
-    color: #4caf50;
-    border-left: 3px solid #4caf50;
-}
+    .nav-item.active {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4caf50;
+        border-left: 3px solid #4caf50;
+    }
 
 .nav-icon {
     margin-right: 0.75rem;
@@ -95,10 +95,10 @@
     transition: all 0.2s;
 }
 
-.logout-btn:hover {
-    background: rgba(244, 67, 54, 0.2);
-    color: #f44336;
-}
+    .logout-btn:hover {
+        background: rgba(244, 67, 54, 0.2);
+        color: #f44336;
+    }
 
 .main-content {
     flex: 1;
@@ -115,7 +115,7 @@
     .sidebar {
         width: 200px;
     }
-    
+
     .main-content {
         margin-left: 200px;
     }
@@ -127,11 +127,11 @@
         height: auto;
         position: relative;
     }
-    
+
     .main-content {
         margin-left: 0;
     }
-    
+
     .app-container {
         flex-direction: column;
     }
@@ -179,9 +179,9 @@
     transition: opacity 0.2s;
 }
 
-.logo-link:hover {
-    opacity: 0.8;
-}
+    .logo-link:hover {
+        opacity: 0.8;
+    }
 
 .logo {
     color: #fff;
@@ -202,17 +202,17 @@
     transition: all 0.2s;
 }
 
-.auth-link:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-}
+    .auth-link:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+    }
 
-.auth-link.register {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    font-weight: 500;
-}
+    .auth-link.register {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        font-weight: 500;
+    }
 
-.auth-link.register:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
+        .auth-link.register:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
