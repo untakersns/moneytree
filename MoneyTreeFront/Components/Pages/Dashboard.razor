@@ -2,7 +2,6 @@
 @layout MainLayout
 @inject TransactionService TransactionService
 @inject CategoryService CategoryService
-@inject NavigationManager Navigation
 
 <PageTitle>Dashboard - MoneyTree</PageTitle>
 
@@ -65,16 +64,19 @@ else
         </div>
 
         @* Расходы по категориям *@
-        @if (expensesByCategory.Any())
-        {
-            <div class="chart-section">
-                <h2>Расходы по категориям</h2>
+        <div class="chart-section">
+            <h2>📉 Расходы по категориям</h2>
+            @if (expensesByCategory.Any())
+            {
                 <div class="categories-chart">
                     @foreach (var item in expensesByCategory)
                     {
-                        var percentage = balance.TotalExpense > 0 
-                            ? (item.TotalAmount / balance.TotalExpense * 100) 
+                        var rawPercent = balance.TotalExpense > 0 
+                            ? (double)item.TotalAmount / (double)balance.TotalExpense * 100
                             : 0;
+                        
+                        var percentage = Math.Round(rawPercent, 1);
+                        var progressWidth = Math.Max(rawPercent, 0).ToString(System.Globalization.CultureInfo.InvariantCulture);
                         
                         <div class="category-bar">
                             <div class="category-info">
@@ -82,14 +84,52 @@ else
                                 <span class="category-amount">@item.TotalAmount.ToString("N2") @balance.Currency</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: @percentage%"></div>
+                                <div class="progress-fill" style="width:@(progressWidth)%"></div>
                             </div>
-                            <span class="category-percent">@percentage.ToString("N0")%</span>
+                            <span class="category-percent">@percentage%</span>
                         </div>
                     }
                 </div>
-            </div>
-        }
+            }
+            else
+            {
+                <p class="no-data">Нет данных о расходах</p>
+            }
+        </div>
+
+        @* Доходы по категориям *@
+        <div class="chart-section">
+            <h2>📈 Доходы по категориям</h2>
+            @if (incomeByCategory.Any())
+            {
+                <div class="categories-chart">
+                    @foreach (var item in incomeByCategory)
+                    {
+                        var rawPercent = balance.TotalIncome > 0 
+                            ? (double)item.TotalAmount / (double)balance.TotalIncome * 100
+                            : 0;
+                        
+                        var percentage = Math.Round(rawPercent, 1);
+                        var progressWidth = Math.Max(rawPercent, 0).ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        
+                        <div class="category-bar">
+                            <div class="category-info">
+                                <span class="category-name">@item.CategoryName</span>
+                                <span class="category-amount">@item.TotalAmount.ToString("N2") @balance.Currency</span>
+                            </div>
+                            <div class="progress-bar income">
+                                <div class="progress-fill income" style="width:@(progressWidth)%"></div>
+                            </div>
+                            <span class="category-percent">@percentage%</span>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="no-data">Нет данных о доходах</p>
+            }
+        </div>
 
         @* Последние транзакции *@
         <div class="transactions-section">
@@ -144,10 +184,12 @@ else
     private bool isAuthenticated = false;
     private BalanceDto balance = new();
     private List<ExpenseByCategoryDto> expensesByCategory = new();
+    private List<ExpenseByCategoryDto> incomeByCategory = new();
     private List<TransactionDto> recentTransactions = new();
     private string selectedPeriod = "month";
 
     [Inject] private AuthService AuthService { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -162,16 +204,16 @@ else
         await LoadData();
     }
 
-    private void NavigateToTransactions()
-    {
-        Navigation.NavigateTo("/transactions", forceLoad: true);
-    }
-
     private async Task OnPeriodChangedAsync(ChangeEventArgs e)
     {
         selectedPeriod = e.Value?.ToString() ?? "month";
         await LoadData();
         StateHasChanged();
+    }
+
+    private void NavigateToTransactions()
+    {
+        Navigation.NavigateTo("/transactions", forceLoad: true);
     }
 
     private async Task LoadData()
@@ -188,7 +230,7 @@ else
             {
                 case "week":
                     startDate = now.AddDays(-(int)now.DayOfWeek);
-                    endDate = now.AddDays(1); // +1 день чтобы включить сегодняшние транзакции
+                    endDate = now.AddDays(1);
                     break;
                 case "month":
                     startDate = new DateTime(now.Year, now.Month, 1);
@@ -205,27 +247,22 @@ else
                     break;
             }
 
-            Console.WriteLine($"📊 Загрузка Dashboard за период: {selectedPeriod}");
-            Console.WriteLine($"   startDate: {startDate}, endDate: {endDate}");
-
             // Загружаем баланс
             balance = await TransactionService.GetBalanceAsync(startDate, endDate);
-            Console.WriteLine($"   💰 Баланс: {balance.Balance}");
 
             // Загружаем расходы по категориям
             expensesByCategory = await TransactionService.GetExpensesByCategoryAsync(startDate, endDate);
-            Console.WriteLine($"   📊 Категорий: {expensesByCategory.Count}");
+            
+            // Загружаем доходы по категориям
+            incomeByCategory = await TransactionService.GetIncomeByCategoryAsync(startDate, endDate);
 
             // Загружаем последние транзакции (только 5)
             var allTransactions = await TransactionService.GetAllAsync(startDate, endDate);
-            Console.WriteLine($"   📄 Всего транзакций: {allTransactions.Count}");
-            
             recentTransactions = allTransactions.OrderByDescending(t => t.Date).Take(5).ToList();
-            Console.WriteLine($"   📄 Показываем: {recentTransactions.Count}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Ошибка загрузки: {ex.Message}");
+            Console.WriteLine($"Ошибка загрузки: {ex.Message}");
         }
         finally
         {

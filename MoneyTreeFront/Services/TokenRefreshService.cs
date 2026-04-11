@@ -64,6 +64,7 @@ public class TokenRefreshService
 
         if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
         {
+            Console.WriteLine($"❌ Refresh failed: tokens are null. accessToken: {accessToken != null}, refreshToken: {refreshToken != null}");
             return false;
         }
 
@@ -71,28 +72,40 @@ public class TokenRefreshService
         {
             // Используем анонимный клиент (без AuthorizationMessageHandler)
             var httpClient = _httpClientFactory.CreateClient("MoneyTreeAPI.Anonymous");
+            
+            Console.WriteLine($"🔄 Attempting token refresh...");
+            
             var response = await httpClient.PostAsJsonAsync("/api/auth/refresh", new { accessToken, refreshToken });
 
             if (!response.IsSuccessStatusCode)
             {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"❌ Refresh failed with status {response.StatusCode}: {error}");
                 return false;
             }
 
+            Console.WriteLine($"✅ Refresh successful, parsing response...");
+            
             var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
 
             if (authResponse != null)
             {
                 await _localStorage.SetItemAsync("accessToken", authResponse.AccessToken);
                 await _localStorage.SetItemAsync("refreshToken", authResponse.RefreshToken);
+                Console.WriteLine($"✅ Tokens saved to localStorage");
                 return true;
             }
+            else
+            {
+                Console.WriteLine($"❌ Response content is null");
+                return false;
+            }
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"❌ Refresh exception: {ex.Message}");
             return false;
         }
-
-        return false;
     }
 
     // Проверяет и обновляет токен если нужно

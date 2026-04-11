@@ -167,6 +167,26 @@ public class TransactionsController : ControllerBase
     }
 
     /// <summary>
+    /// Получить доходы по категориям
+    /// </summary>
+    [HttpGet("income-by-category")]
+    public async Task<IActionResult> GetIncomeByCategory([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+    {
+        var userId = _currentUserService.UserId;
+
+        var query = new GetIncomeByCategoryQuery
+        {
+            UserId = userId!,
+            StartDate = startDate,
+            EndDate = endDate
+        };
+
+        var result = await _mediator.Send(query);
+
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Создать новую категорию
     /// </summary>
     [HttpPost("categories")]

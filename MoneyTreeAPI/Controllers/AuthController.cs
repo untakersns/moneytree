@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MoneyTreeAPI.DBs;
 using MoneyTreeAPI.DTOs;
 using MoneyTreeAPI.Models;
 using MoneyTreeAPI.Services;
@@ -16,17 +18,20 @@ public class AuthController : ControllerBase
     private readonly SignInManager<User> _signInManager;
     private readonly IJwtService _jwtService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly MoneyTreeDBContext _db;
 
     public AuthController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         IJwtService jwtService,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        MoneyTreeDBContext db)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _jwtService = jwtService;
         _currentUserService = currentUserService;
+        _db = db;
     }
 
     /// <summary>
@@ -66,6 +71,9 @@ public class AuthController : ControllerBase
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _userManager.UpdateAsync(user);
 
+        // Создаём базовые категории для нового пользователя
+        await CreateDefaultCategories(user.Id);
+
         return Ok(new AuthResponseDto
         {
             AccessToken = accessToken,
@@ -73,6 +81,29 @@ public class AuthController : ControllerBase
             UserId = user.Id,
             RefreshToken = refreshToken
         });
+    }
+
+    private async Task CreateDefaultCategories(string userId)
+    {
+        var defaultCategories = new List<Category>
+        {
+            // Расходы
+            new() { Name = "Продукты", Type = CategoryType.Expense, UserId = userId },
+            new() { Name = "Транспорт", Type = CategoryType.Expense, UserId = userId },
+            new() { Name = "Кафе и рестораны", Type = CategoryType.Expense, UserId = userId },
+            new() { Name = "Здоровье", Type = CategoryType.Expense, UserId = userId },
+            new() { Name = "Одежда", Type = CategoryType.Expense, UserId = userId },
+            new() { Name = "Развлечения", Type = CategoryType.Expense, UserId = userId },
+            new() { Name = "Коммунальные услуги", Type = CategoryType.Expense, UserId = userId },
+            new() { Name = "Связь и интернет", Type = CategoryType.Expense, UserId = userId },
+            // Доходы
+            new() { Name = "Зарплата", Type = CategoryType.Income, UserId = userId },
+            new() { Name = "Фриланс", Type = CategoryType.Income, UserId = userId },
+            new() { Name = "Подработка", Type = CategoryType.Income, UserId = userId },
+        };
+
+        _db.Categories.AddRange(defaultCategories);
+        await _db.SaveChangesAsync();
     }
 
     /// <summary>

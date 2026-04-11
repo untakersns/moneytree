@@ -86,7 +86,7 @@ public class TransactionService
         DateTime? endDate = null)
     {
         var httpClient = _httpClientFactory.CreateClient("MoneyTreeAPI");
-
+        
         var url = "/api/transactions/transactions-by-category";
         var queryParams = new List<string>();
 
@@ -101,5 +101,27 @@ public class TransactionService
 
         var expenses = await httpClient.GetFromJsonAsync<List<ExpenseByCategoryDto>>(url);
         return expenses ?? new List<ExpenseByCategoryDto>();
+    }
+
+    public async Task<List<ExpenseByCategoryDto>> GetIncomeByCategoryAsync(
+        DateTime? startDate = null,
+        DateTime? endDate = null)
+    {
+        var httpClient = _httpClientFactory.CreateClient("MoneyTreeAPI");
+        
+        var url = "/api/transactions/income-by-category";
+        var queryParams = new List<string>();
+
+        if (startDate.HasValue)
+            queryParams.Add($"startDate={startDate.Value:yyyy-MM-dd}");
+
+        if (endDate.HasValue)
+            queryParams.Add($"endDate={endDate.Value:yyyy-MM-dd}");
+
+        if (queryParams.Count > 0)
+            url += "?" + string.Join("&", queryParams);
+
+        var income = await httpClient.GetFromJsonAsync<List<ExpenseByCategoryDto>>(url);
+        return income ?? new List<ExpenseByCategoryDto>();
     }
 }
