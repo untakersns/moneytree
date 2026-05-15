@@ -190,17 +190,30 @@ else
 
     [Inject] private AuthService AuthService { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private IHttpClientFactory _httpClientFactory { get; set; } = default!;
+    [Inject] private LocalStorageService _localStorage { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
         isAuthenticated = await AuthService.IsAuthenticatedAsync();
-        
+
         if (!isAuthenticated)
         {
             isLoading = false;
             return;
         }
-        
+
+        // Пробуем обновить токен перед загрузкой данных
+        try
+        {
+            var tokenRefreshService = new TokenRefreshService(_httpClientFactory, _localStorage);
+            await tokenRefreshService.EnsureValidTokenAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"⚠️ Error ensuring valid token: {ex.Message}");
+        }
+
         await LoadData();
     }
 

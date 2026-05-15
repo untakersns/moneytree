@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MoneyTreeFront.Services;
 
@@ -9,9 +10,12 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     private readonly LocalStorageService _localStorage;
     private readonly AuthenticationState _anonymous;
 
-    public CustomAuthStateProvider(LocalStorageService localStorage)
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public CustomAuthStateProvider(LocalStorageService localStorage, IHttpClientFactory httpClientFactory)
     {
         _localStorage = localStorage;
+        _httpClientFactory = httpClientFactory;
         _anonymous = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
     }
 
@@ -37,10 +41,35 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
                 var expTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expClaim.Value)).DateTime;
                 if (expTime < DateTime.UtcNow)
                 {
-                    // Токен истёк, пробуем обновить
-                    await _localStorage.RemoveItemAsync("accessToken");
-                    await _localStorage.RemoveItemAsync("refreshToken");
-                    return _anonymous;
+            // Токен истёк, пробуем обновить через TokenRefreshService
+            try
+            {
+                var tokenRefreshService = new TokenRefreshService(_httpClientFactory, _localStorage);
+                var refreshSuccessful = await tokenRefreshService.RefreshTokenAsync();
+
+                if (refreshSuccessful)
+                {
+                    // Если обновление удалось, получаем новый токен и продолжаем
+                    var newToken = await _localStorage.GetItemAsync("accessToken");
+                    if (!string.IsNullOrEmpty(newToken))
+                    {
+                        var newClaims = ParseClaimsFromJwt(newToken);
+                        var newIdentity = new ClaimsIdentity(newClaims, "jwt");
+                        var newUser = new ClaimsPrincipal(newIdentity);
+                        return new AuthenticationState(newUser);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ Error during token refresh: {ex.Message}");
+            }
+
+            // Если обновление не удалось, удаляем токены и возвращаем анонимного пользователя
+            await _localStorage.RemoveItemAsync("accessToken");
+            await _localStorage.RemoveItemAsync("refreshToken");
+            Console.WriteLine($"⚠️ Token refresh failed, user will see unauthorized version");
+            return _anonymous;
                 }
             }
 

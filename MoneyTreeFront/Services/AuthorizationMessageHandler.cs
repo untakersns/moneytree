@@ -48,13 +48,13 @@ public class AuthorizationMessageHandler : DelegatingHandler
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             Console.WriteLine($"⚠️ Received 401, attempting token refresh...");
-            
+
             var refreshed = await _tokenRefreshService.RefreshTokenAsync();
 
             if (refreshed)
             {
                 Console.WriteLine($"✅ Token refreshed, retrying request...");
-                
+
                 // Получаем новый токен
                 var newToken = await _localStorage.GetItemAsync("accessToken");
 
@@ -70,6 +70,9 @@ public class AuthorizationMessageHandler : DelegatingHandler
             else
             {
                 Console.WriteLine($"❌ Token refresh failed after 401");
+                // Очищаем токены, чтобы пользователь увидел неавторизованную версию
+                await _localStorage.RemoveItemAsync("accessToken");
+                await _localStorage.RemoveItemAsync("refreshToken");
             }
         }
 

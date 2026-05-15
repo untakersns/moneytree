@@ -59,9 +59,20 @@ public class LocalStorageService
         {
             await _js.InvokeVoidAsync("localStorage.removeItem", key);
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException ex)
         {
             // Игнорируем ошибки во время prerendering
+            Console.WriteLine($"LocalStorage remove ignored during prerendering: {ex.Message}");
+        }
+        catch (JSException ex)
+        {
+            // Обрабатываем ошибки JSInterop
+            Console.WriteLine($"JSInterop error in RemoveItemAsync: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            // Обрабатываем все остальные ошибки
+            Console.WriteLine($"Unexpected error in RemoveItemAsync: {ex.Message}");
         }
     }
 
@@ -72,9 +83,43 @@ public class LocalStorageService
         {
             await _js.InvokeVoidAsync("localStorage.clear");
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException ex)
         {
             // Игнорируем ошибки во время prerendering
+            Console.WriteLine($"LocalStorage clear ignored during prerendering: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            // Обрабатываем все остальные ошибки
+            Console.WriteLine($"Unexpected error in ClearAsync: {ex.Message}");
+        }
+    }
+
+    public async ValueTask SyncCacheAsync()
+    {
+        try
+        {
+            // Очищаем текущий кэш
+            _cache.Clear();
+
+            // Загружаем все ключи из localStorage
+            var keys = await _js.InvokeAsync<string[]>("Object.keys", "localStorage");
+
+            if (keys != null)
+            {
+                foreach (var key in keys)
+                {
+                    var value = await _js.InvokeAsync<string>("localStorage.getItem", key);
+                    if (value != null)
+                    {
+                        _cache[key] = value;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error syncing cache: {ex.Message}");
         }
     }
 }

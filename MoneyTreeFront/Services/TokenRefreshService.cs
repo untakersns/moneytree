@@ -56,15 +56,32 @@ public class TokenRefreshService
         }
     }
 
+    // Проверяет валидность refresh token
+    public async Task<bool> IsRefreshTokenValidAsync()
+    {
+        var refreshToken = await _localStorage.GetItemAsync("refreshToken");
+
+        // Для простой случайной строки мы не можем проверить срок действия на фронтенде
+        // Это делается на бэкенде в AuthController.Refresh()
+        return !string.IsNullOrEmpty(refreshToken);
+    }
+
     // Обновляет токен через refresh token
     public async Task<bool> RefreshTokenAsync()
     {
+        // Проверяем валидность refresh token перед попыткой обновления
+        if (!await IsRefreshTokenValidAsync())
+        {
+            Console.WriteLine("❌ Refresh token is expired or invalid");
+            return false;
+        }
+
         var accessToken = await _localStorage.GetItemAsync("accessToken");
         var refreshToken = await _localStorage.GetItemAsync("refreshToken");
 
         if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
         {
-            Console.WriteLine($"❌ Refresh failed: tokens are null. accessToken: {accessToken != null}, refreshToken: {refreshToken != null}");
+            Console.WriteLine($"❌ Refresh failed: tokens are null");
             return false;
         }
 
@@ -81,6 +98,14 @@ public class TokenRefreshService
             {
                 var error = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"❌ Refresh failed with status {response.StatusCode}: {error}");
+
+                // Если 401, значит refresh token тоже истек
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    await _localStorage.RemoveItemAsync("accessToken");
+                    await _localStorage.RemoveItemAsync("refreshToken");
+                }
+
                 return false;
             }
 
