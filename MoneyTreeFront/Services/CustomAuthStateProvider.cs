@@ -28,6 +28,8 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
             if (string.IsNullOrEmpty(token))
             {
+                // Очищаем refresh token тоже, если access token отсутствует
+                await _localStorage.RemoveItemAsync("refreshToken");
                 return _anonymous;
             }
 
@@ -39,7 +41,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             if (expClaim != null)
             {
                 var expTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expClaim.Value)).DateTime;
-                if (expTime < DateTime.UtcNow)
+                if (expTime <= DateTime.UtcNow.AddMinutes(5))
                 {
             // Токен истёк, пробуем обновить через TokenRefreshService
             try
@@ -65,10 +67,9 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
                 Console.WriteLine($"⚠️ Error during token refresh: {ex.Message}");
             }
 
-            // Если обновление не удалось, удаляем токены и возвращаем анонимного пользователя
-            await _localStorage.RemoveItemAsync("accessToken");
-            await _localStorage.RemoveItemAsync("refreshToken");
-            Console.WriteLine($"⚠️ Token refresh failed, user will see unauthorized version");
+            // Если обновление не удалось, возвращаем анонимного пользователя
+            // Токены уже очищены в TokenRefreshService если бэкенд вернул 401
+            Console.WriteLine($"⚠️ Token expired and refresh failed");
             return _anonymous;
                 }
             }
@@ -78,8 +79,11 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
             return new AuthenticationState(user);
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"⚠️ Error in GetAuthenticationStateAsync: {ex.Message}");
+            // При любой ошибке парсинга очищаем токены
+            await _localStorage.ClearAsync();
             return _anonymous;
         }
     }

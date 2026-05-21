@@ -159,18 +159,36 @@ public class AuthController : ControllerBase
         var userId = userData.FindFirstValue(ClaimTypes.NameIdentifier);
         var user = await _userManager.FindByIdAsync(userId!);
 
-        if (user == null || user.RefreshToken != dto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+        if (user == null)
         {
+            Console.WriteLine($"⚠️ Refresh failed: User not found (userId: {userId})");
+            return Unauthorized(new { message = "Неверный refresh-токен" });
+        }
+
+        if (user.RefreshToken != dto.RefreshToken)
+        {
+            Console.WriteLine($"⚠️ Refresh failed: Token mismatch");
+            Console.WriteLine($"   DB token: {user.RefreshToken}");
+            Console.WriteLine($"   Request token: {dto.RefreshToken}");
+            return Unauthorized(new { message = "Неверный refresh-токен" });
+        }
+
+        if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+        {
+            Console.WriteLine($"⚠️ Refresh failed: Token expired in DB");
+            Console.WriteLine($"   Expiry time: {user.RefreshTokenExpiryTime}");
+            Console.WriteLine($"   Current time: {DateTime.UtcNow}");
             return Unauthorized(new { message = "Неверный refresh-токен" });
         }
 
         var newAccessToken = _jwtService.GenerateToken(user);
-        var newRefreshToken = _jwtService.GenerateRefreshToken();
+        // Не генерируем новый refresh token - используем старый
+        var newRefreshToken = user.RefreshToken;
 
-        user.RefreshToken = newRefreshToken;
+        // Обновляем только срок действия refresh token
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _userManager.UpdateAsync(user);
-
+        await _db.SaveChangesAsync();
         return Ok(new AuthResponseDto
         {
             AccessToken = newAccessToken,

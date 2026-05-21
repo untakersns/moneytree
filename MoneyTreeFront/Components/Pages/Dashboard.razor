@@ -1,8 +1,8 @@
 @page "/dashboard"
 @layout MainLayout
+@using MoneyTreeFront.Components.Charts
 @inject TransactionService TransactionService
 @inject CategoryService CategoryService
-
 <PageTitle>Dashboard - MoneyTree</PageTitle>
 
 @if (!isAuthenticated)
@@ -33,7 +33,7 @@ else
                 </select>
             </div>
         </div>
-        
+
         @* Баланс *@
         <div class="balance-cards">
             <div class="card balance-card income">
@@ -68,28 +68,12 @@ else
             <h2>📉 Расходы по категориям</h2>
             @if (expensesByCategory.Any())
             {
-                <div class="categories-chart">
-                    @foreach (var item in expensesByCategory)
+                <PieChart Data="@expensesByCategory.Select(e => new PieChart.ChartDataItem
                     {
-                        var rawPercent = balance.TotalExpense > 0 
-                            ? (double)item.TotalAmount / (double)balance.TotalExpense * 100
-                            : 0;
-                        
-                        var percentage = Math.Round(rawPercent, 1);
-                        var progressWidth = Math.Max(rawPercent, 0).ToString(System.Globalization.CultureInfo.InvariantCulture);
-                        
-                        <div class="category-bar">
-                            <div class="category-info">
-                                <span class="category-name">@item.CategoryName</span>
-                                <span class="category-amount">@item.TotalAmount.ToString("N2") @balance.Currency</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width:@(progressWidth)%"></div>
-                            </div>
-                            <span class="category-percent">@percentage%</span>
-                        </div>
-                    }
-                </div>
+                        Label = e.CategoryName,
+                        Value = (double)e.TotalAmount
+                    }).ToList()"
+                    BackgroundColors="@expenseColors" />
             }
             else
             {
@@ -102,28 +86,12 @@ else
             <h2>📈 Доходы по категориям</h2>
             @if (incomeByCategory.Any())
             {
-                <div class="categories-chart">
-                    @foreach (var item in incomeByCategory)
+                <PieChart Data="@incomeByCategory.Select(i => new PieChart.ChartDataItem
                     {
-                        var rawPercent = balance.TotalIncome > 0 
-                            ? (double)item.TotalAmount / (double)balance.TotalIncome * 100
-                            : 0;
-                        
-                        var percentage = Math.Round(rawPercent, 1);
-                        var progressWidth = Math.Max(rawPercent, 0).ToString(System.Globalization.CultureInfo.InvariantCulture);
-                        
-                        <div class="category-bar">
-                            <div class="category-info">
-                                <span class="category-name">@item.CategoryName</span>
-                                <span class="category-amount">@item.TotalAmount.ToString("N2") @balance.Currency</span>
-                            </div>
-                            <div class="progress-bar income">
-                                <div class="progress-fill income" style="width:@(progressWidth)%"></div>
-                            </div>
-                            <span class="category-percent">@percentage%</span>
-                        </div>
-                    }
-                </div>
+                        Label = i.CategoryName,
+                        Value = (double)i.TotalAmount
+                    }).ToList()"
+                    BackgroundColors="@incomeColors" />
             }
             else
             {
@@ -137,7 +105,7 @@ else
                 <h2>Последние транзакции</h2>
                 <a href="/transactions" class="view-all" @onclick="NavigateToTransactions">Все транзакции →</a>
             </div>
-            
+
             @if (recentTransactions.Any())
             {
                 <div class="transactions-table">
@@ -187,6 +155,29 @@ else
     private List<ExpenseByCategoryDto> incomeByCategory = new();
     private List<TransactionDto> recentTransactions = new();
     private string selectedPeriod = "month";
+
+    // Цвета для чартов
+    private string[] expenseColors = {
+        "rgb(255, 99, 132)",
+        "rgb(255, 159, 64)",
+        "rgb(255, 205, 86)",
+        "rgb(75, 192, 192)",
+        "rgb(54, 162, 235)",
+        "rgb(153, 102, 255)",
+        "rgb(201, 203, 207)",
+        "rgb(255, 99, 132)"
+    };
+
+    private string[] incomeColors = {
+        "rgb(75, 192, 192)",
+        "rgb(54, 162, 235)",
+        "rgb(153, 102, 255)",
+        "rgb(201, 203, 207)",
+        "rgb(75, 192, 192)",
+        "rgb(54, 162, 235)",
+        "rgb(153, 102, 255)",
+        "rgb(201, 203, 207)"
+    };
 
     [Inject] private AuthService AuthService { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
@@ -265,7 +256,7 @@ else
 
             // Загружаем расходы по категориям
             expensesByCategory = await TransactionService.GetExpensesByCategoryAsync(startDate, endDate);
-            
+
             // Загружаем доходы по категориям
             incomeByCategory = await TransactionService.GetIncomeByCategoryAsync(startDate, endDate);
 

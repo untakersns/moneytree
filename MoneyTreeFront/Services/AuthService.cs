@@ -82,42 +82,6 @@ public class AuthService
         }
     }
 
-    public async Task<bool> RefreshTokenAsync()
-    {
-        var accessToken = await _localStorage.GetItemAsync("accessToken");
-        var refreshToken = await _localStorage.GetItemAsync("refreshToken");
-
-        if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
-        {
-            return false;
-        }
-
-        try
-        {
-            var response = await _httpClient.PostAsJsonAsync("/api/auth/refresh", new { accessToken, refreshToken });
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return false;
-            }
-
-            var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
-
-            if (authResponse != null)
-            {
-                await _localStorage.SetItemAsync("accessToken", authResponse.AccessToken);
-                await _localStorage.SetItemAsync("refreshToken", authResponse.RefreshToken);
-                return true;
-            }
-        }
-        catch
-        {
-            return false;
-        }
-
-        return false;
-    }
-
     public async Task<bool> IsAuthenticatedAsync()
     {
         var token = await _localStorage.GetItemAsync("accessToken");

@@ -70,9 +70,8 @@ public class AuthorizationMessageHandler : DelegatingHandler
             else
             {
                 Console.WriteLine($"❌ Token refresh failed after 401");
-                // Очищаем токены, чтобы пользователь увидел неавторизованную версию
-                await _localStorage.RemoveItemAsync("accessToken");
-                await _localStorage.RemoveItemAsync("refreshToken");
+                // Токены уже очищены в TokenRefreshService если бэкенд вернул 401
+                // При сетевых ошибках токены сохранены для повторной попытки
             }
         }
 

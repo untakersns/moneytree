@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using MoneyTreeFront.Components;
 using MoneyTreeFront.Services;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -17,7 +16,6 @@ builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<CategoryService>();
-
 // HttpClient для авторизованных запросов (с токеном)
 builder.Services.AddHttpClient("MoneyTreeAPI", (sp, client) =>
 {

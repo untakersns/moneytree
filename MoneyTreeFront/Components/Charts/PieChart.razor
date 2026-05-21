@@ -1,0 +1,58 @@
+@using Microsoft.JSInterop
+
+<div class="pie-chart-container">
+    <canvas id="@CanvasId" width="400" height="400"></canvas>
+</div>
+
+@code {
+    [Parameter]
+    public string CanvasId { get; set; } = "pieChart-" + Guid.NewGuid().ToString("N");
+
+    [Parameter]
+    public List<ChartDataItem> Data { get; set; } = new();
+
+    [Parameter]
+    public string[] BackgroundColors { get; set; } = {
+        "rgb(255, 99, 132)",
+        "rgb(54, 162, 235)",
+        "rgb(255, 205, 86)",
+        "rgb(75, 192, 192)",
+        "rgb(153, 102, 255)",
+        "rgb(255, 159, 64)",
+        "rgb(199, 199, 199)",
+        "rgb(83, 240, 183)"
+    };
+
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Data.Any())
+        {
+            await CreateChart();
+        }
+    }
+
+    private async Task CreateChart()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("chartHelper.createPieChart",
+                CanvasId,
+                Data.Select(d => d.Label).ToArray(),
+                Data.Select(d => d.Value).ToArray(),
+                BackgroundColors);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating chart: {ex.Message}");
+        }
+    }
+
+    public class ChartDataItem
+    {
+        public string Label { get; set; }
+        public double Value { get; set; }
+    }
+}

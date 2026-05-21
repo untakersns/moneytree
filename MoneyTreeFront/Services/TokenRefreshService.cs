@@ -79,6 +79,10 @@ public class TokenRefreshService
         var accessToken = await _localStorage.GetItemAsync("accessToken");
         var refreshToken = await _localStorage.GetItemAsync("refreshToken");
 
+        Console.WriteLine($"🔑 Using tokens from localStorage:");
+        Console.WriteLine($"   Access: {accessToken?.Substring(0, 20)}...");
+        Console.WriteLine($"   Refresh: {refreshToken?.Substring(0, 20)}...");
+
         if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
         {
             Console.WriteLine($"❌ Refresh failed: tokens are null");
@@ -99,13 +103,17 @@ public class TokenRefreshService
                 var error = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"❌ Refresh failed with status {response.StatusCode}: {error}");
 
-                // Если 401, значит refresh token тоже истек
+                // Если 401, значит refresh token тоже истек - очищаем все токены
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    await _localStorage.RemoveItemAsync("accessToken");
-                    await _localStorage.RemoveItemAsync("refreshToken");
+                    Console.WriteLine($"⚠️ Refresh token is invalid on backend, clearing all tokens");
+                    await _localStorage.ClearAsync();
+                    return false;
                 }
 
+                // При других ошибках (сетевые проблемы и т.д.) не очищаем токены
+                // чтобы можно было попробовать снова
+                Console.WriteLine($"⚠️ Refresh failed due to {response.StatusCode}, keeping tokens for retry");
                 return false;
             }
 
