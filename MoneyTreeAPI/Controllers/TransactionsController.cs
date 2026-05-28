@@ -26,9 +26,9 @@ public class TransactionsController : ControllerBase
         _currentUserService = currentUserService;
     }
 
-    /// <summary>
+    ///
     /// Создать новую транзакцию
-    /// </summary>
+    ///
     [HttpPost]
     public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionDto dto)
     {
@@ -88,9 +88,10 @@ public class TransactionsController : ControllerBase
         return NoContent();
     }
 
-    /// <summary>
+    ///
     /// Получить список категорий
-    /// </summary>
+    ///
+
     [HttpGet("categories")]
     public async Task<IActionResult> GetCategories()
     {
@@ -106,9 +107,10 @@ public class TransactionsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
+    ///
     /// Получить баланс
-    /// </summary>
+    ///
+
     [HttpGet("balance")]
     public async Task<IActionResult> GetBalance([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
@@ -126,9 +128,10 @@ public class TransactionsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
+    ///
     /// Получить транзакции за период
-    /// </summary>
+    ///
+
     [HttpGet]
     public async Task<IActionResult> GetTransactions([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
@@ -146,9 +149,10 @@ public class TransactionsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
+    ///
     /// Получить расходы по категориям
-    /// </summary>
+    ///
+
     [HttpGet("transactions-by-category")]
     public async Task<IActionResult> GetTransactionsByCategory([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
@@ -166,9 +170,10 @@ public class TransactionsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
+    ///
     /// Получить доходы по категориям
-    /// </summary>
+    ///
+
     [HttpGet("income-by-category")]
     public async Task<IActionResult> GetIncomeByCategory([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
@@ -186,9 +191,10 @@ public class TransactionsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
+    ///
     /// Создать новую категорию
-    /// </summary>
+    ///
+
     [HttpPost("categories")]
     public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto dto)
     {
@@ -206,9 +212,30 @@ public class TransactionsController : ControllerBase
         return CreatedAtAction(nameof(GetCategories), new { id = result.Id }, result);
     }
 
-    /// <summary>
+    ///
+    /// Удалить категорию
+    ///
+
+    [HttpDelete("categories/{id}")]
+    public async Task<IActionResult> DeleteCategory(int id)
+    {
+        var userId = _currentUserService.UserId;
+
+        var command = new DeleteCategoryCommand
+        {
+            Id = id,
+            UserId = userId!
+        };
+
+        await _mediator.Send(command);
+
+        return NoContent();
+    }
+
+    ///
     /// Получить транзакцию по ID
-    /// </summary>
+    ///
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTransactionById(int id)
     {

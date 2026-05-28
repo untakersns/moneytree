@@ -84,6 +84,9 @@ else
                             {
                                 <span class="system-badge">Системная</span>
                             }
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteCategory(cat.Id)">
+                                🗑️
+                            </button>
                         </div>
                     }
                 </div>
@@ -102,6 +105,9 @@ else
                             {
                                 <span class="system-badge">Системная</span>
                             }
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteCategory(cat.Id)">
+                                🗑️
+                            </button>
                         </div>
                     }
                 </div>
@@ -175,7 +181,7 @@ else
     {
         isSubmitting = true;
         errorMessage = "";
-        
+
         try
         {
             var createDto = new CreateCategoryDto
@@ -183,9 +189,9 @@ else
                 Name = categoryForm.Name,
                 Type = categoryForm.Type
             };
-            
+
             await CategoryService.CreateAsync(createDto);
-            
+
             ShowForm = false;
             categoryForm = new();
             await LoadCategories();
@@ -197,6 +203,19 @@ else
         finally
         {
             isSubmitting = false;
+        }
+    }
+
+    private async Task DeleteCategory(int categoryId)
+    {
+        try
+        {
+            await CategoryService.DeleteAsync(categoryId);
+            await LoadCategories();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка удаления: {ex.Message}";
         }
     }
 

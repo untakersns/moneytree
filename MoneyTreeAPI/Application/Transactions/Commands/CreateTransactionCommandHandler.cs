@@ -37,7 +37,7 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
         }
 
         // Категория должна принадлежать пользователю или быть системной (UserId == null)
-        if (category.UserId != request.UserId)
+        if (category.UserId != null && category.UserId != request.UserId)
         {
             throw new InvalidOperationException("Категория не принадлежит пользователю");
         }

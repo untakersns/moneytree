@@ -25,7 +25,7 @@ else
     @if (ShowForm)
     {
         <div class="form-card">
-            <h2>Новая транзакция</h2>
+            <h2>@(editingTransaction == null ? "Новая транзакция" : "Редактировать транзакцию")</h2>
             
             <EditForm Model="transactionForm" OnValidSubmit="CreateTransaction">
                 <DataAnnotationsValidator />
@@ -77,11 +77,20 @@ else
                     <div class="error-message">@errorMessage</div>
                 }
                 
-                <div class="form-actions">
+            <div class="form-actions">
                     <button type="button" class="btn btn-secondary" @onclick="ToggleForm">Отмена</button>
-                    <button type="submit" class="btn btn-primary" disabled="@(isSubmitting)">
-                        @(isSubmitting ? "Сохранение..." : "Сохранить")
-                    </button>
+                    @if (editingTransaction == null)
+                    {
+                        <button type="submit" class="btn btn-primary" disabled="@(isSubmitting)">
+                            @(isSubmitting ? "Сохранение..." : "Сохранить")
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="UpdateTransaction" disabled="@(isSubmitting)">
+                            @(isSubmitting ? "Обновление..." : "Обновить")
+                        </button>
+                    }
                 </div>
             </EditForm>
         </div>
@@ -98,13 +107,14 @@ else
     {
         <div class="transactions-table">
             <table>
-                <thead>
+                 <thead>
                     <tr>
                         <th>Дата</th>
                         <th>Категория</th>
                         <th>Тип</th>
                         <th>Сумма</th>
                         <th>Комментарий</th>
+                        <th>Действия</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -124,6 +134,14 @@ else
                                 @(t.Type.ToLower() == "income" ? "+" : "-") @t.Amount.ToString("N2") RUB
                             </td>
                             <td class="comment">@t.Comment</td>
+                            <td class="actions-cell">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => StartEditTransaction(t)">
+                                    ✏️
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteTransaction(t.Id)">
+                                    🗑️
+                                </button>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -224,13 +242,20 @@ else
         {
             filteredCategories = allCategories;
         }
+
+        // Автоматически выбираем первую категорию из отфильтрованного списка
+        if (filteredCategories.Any())
+        {
+            transactionForm.CategoryId = filteredCategories[0].Id;
+            StateHasChanged(); // Обновляем UI
+        }
     }
 
     private async Task CreateTransaction()
     {
         isSubmitting = true;
         errorMessage = "";
-        
+
         try
         {
             var createDto = new CreateTransactionDto
@@ -241,10 +266,75 @@ else
                 CategoryId = transactionForm.CategoryId,
                 Comment = transactionForm.Comment
             };
-            
+
             await TransactionService.CreateAsync(createDto);
-            
+
             ShowForm = false;
+            transactionForm = new();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task DeleteTransaction(int transactionId)
+    {
+        try
+        {
+            await TransactionService.DeleteAsync(transactionId);
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка удаления: {ex.Message}";
+        }
+    }
+
+    private TransactionDto? editingTransaction = null;
+
+    private void StartEditTransaction(TransactionDto transaction)
+    {
+        editingTransaction = transaction;
+        transactionForm = new TransactionFormModel
+        {
+            Type = transaction.Type,
+            Amount = transaction.Amount,
+            CategoryId = transaction.CategoryId,
+            Date = transaction.Date,
+            Comment = transaction.Comment
+        };
+        ShowForm = true;
+        FilterCategories();
+    }
+
+    private async Task UpdateTransaction()
+    {
+        if (editingTransaction == null) return;
+
+        isSubmitting = true;
+        errorMessage = "";
+
+        try
+        {
+            var updateDto = new UpdateTransactionDto
+            {
+                Amount = transactionForm.Amount,
+                Date = transactionForm.Date,
+                Type = transactionForm.Type,
+                CategoryId = transactionForm.CategoryId,
+                Comment = transactionForm.Comment
+            };
+
+            await TransactionService.UpdateAsync(editingTransaction.Id, updateDto);
+
+            ShowForm = false;
+            editingTransaction = null;
             transactionForm = new();
             await LoadData();
         }

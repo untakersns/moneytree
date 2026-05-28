@@ -34,9 +34,9 @@ public class AuthController : ControllerBase
         _db = db;
     }
 
-    /// <summary>
+    /// 
     /// Регистрация нового пользователя
-    /// </summary>
+    /// 
     [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
@@ -106,9 +106,9 @@ public class AuthController : ControllerBase
         await _db.SaveChangesAsync();
     }
 
-    /// <summary>
+    /// 
     /// Вход пользователя (логин)
-    /// </summary>
+    /// 
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
@@ -143,9 +143,9 @@ public class AuthController : ControllerBase
         });
     }
 
-    /// <summary>
+    /// 
     /// Обновление access-токена через refresh-токен
-    /// </summary>
+    /// 
     [AllowAnonymous]
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto dto)
@@ -198,9 +198,9 @@ public class AuthController : ControllerBase
         });
     }
 
-    /// <summary>
+    /// 
     /// Выход пользователя (logout) — отзыв refresh-токена
-    /// </summary>
+    /// 
     [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout([FromBody] LogoutRequest request)

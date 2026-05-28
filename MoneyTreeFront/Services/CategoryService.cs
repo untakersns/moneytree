@@ -27,4 +27,11 @@ public class CategoryService
         var created = await response.Content.ReadFromJsonAsync<CategoryDto>();
         return created!;
     }
+
+    public async Task DeleteAsync(int categoryId)
+    {
+        var httpClient = _httpClientFactory.CreateClient("MoneyTreeAPI");
+        var response = await httpClient.DeleteAsync($"/api/transactions/categories/{categoryId}");
+        response.EnsureSuccessStatusCode();
+    }
 }
